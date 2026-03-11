@@ -656,7 +656,7 @@ def plot_future(base_pct, rows, tier_color):
 # ══════════════════════════════════════════════
 # ABOUT MODEL — METRIC CHART
 # ══════════════════════════════════════════════
-MODEL_METRICS = {"Accuracy":0.927,"Precision":0.914,"Recall":0.903,"F1-Score":0.908,"AUC-ROC":0.963}
+MODEL_METRICS = {"Accuracy":96.9,"Precision":90.3,"Recall":93.3,"F1-Score":91.8,"AUC-ROC":0.991}
 FEAT_IMP = [
     ("Z-Score BB/TB",18.4),("Z-Score BB/U",14.2),("Tinggi Badan",11.7),
     ("Min Z-Score",8.9),("Umur × Z-Min",7.3),("Berat Badan",6.8),
@@ -1050,8 +1050,8 @@ with tab_about:
     st.markdown('<p class="slabel">Performa Model</p>', unsafe_allow_html=True)
 
     # Metric cards
-    mc_vals = [("96.9%","Accuracy"),("90.3%","Precision"),("90.3%","Recall"),
-               ("91.8%","F1-Score"),("96.3%","AUC-ROC")]
+    mc_vals = [("96.9%","Accuracy"),("90.3%","Precision"),("93.3%","Recall"),
+               ("91.8%","F1-Score"),("99.91%","AUC-ROC")]
     mc_html = "".join([f"""<div class="mcard">
         <div class="mcard-val">{v}</div><div class="mcard-lbl">{l}</div>
     </div>""" for v,l in mc_vals])
@@ -1070,11 +1070,11 @@ with tab_about:
         <div class="interpbox" style="border-left-color:rgba(201,168,76,.5);">
             <div class="interp-ttl">CatBoost dan XGBoost</div>
             <div style="font-size:.86rem;color:#94a3b8;line-height:1.9;">
-            <b style="color:#e8d48b;">CatBoost</b><br>
+            <b style="color:#e8d48b;">CatBoost (bobot 45%)</b><br>
             &nbsp;· iterations=3000 · learning_rate=0.01 · depth=7 · l2_leaf_reg=5<br>
             &nbsp;· class_weights=[1, 2.0] · rsm=0.8 · bagging_temperature=0.5<br>
             &nbsp;· Early stopping: patience=200<br><br>
-            <b style="color:#e8d48b;">XGBoost</b><br>
+            <b style="color:#e8d48b;">XGBoost (bobot 55%)</b><br>
             &nbsp;· n_estimators=2000 · learning_rate=0.02 · max_depth=7<br>
             &nbsp;· reg_lambda=5 · scale_pos_weight=4 · Early stopping: rounds=100<br><br>
             <b style="color:#e8d48b;">Imbalanced Data</b><br>
@@ -1156,7 +1156,6 @@ st.markdown("""
     <br>Prediksi Awal Berbasis Data Science — Bukan Pengganti Diagnosis Medis
 </div>
 """, unsafe_allow_html=True)
-
 
 
 
