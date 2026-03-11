@@ -656,7 +656,7 @@ def plot_future(base_pct, rows, tier_color):
 # ══════════════════════════════════════════════
 # ABOUT MODEL — METRIC CHART
 # ══════════════════════════════════════════════
-MODEL_METRICS = {"Accuracy":96.9,"Precision":90.3,"Recall":93.3,"F1-Score":91.8,"AUC-ROC":0.991}
+MODEL_METRICS = {"Accuracy":0.969,"Precision":0.903,"Recall":0.933,"F1-Score":0.918,"AUC-ROC":0.991}
 FEAT_IMP = [
     ("Z-Score BB/TB",18.4),("Z-Score BB/U",14.2),("Tinggi Badan",11.7),
     ("Min Z-Score",8.9),("Umur × Z-Min",7.3),("Berat Badan",6.8),
