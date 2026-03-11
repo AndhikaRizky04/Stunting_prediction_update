@@ -539,7 +539,7 @@ def build_features(umur_bulan, jk, berat, tinggi, cara_ukur):
 # ══════════════════════════════════════════════
 # MODEL
 # ══════════════════════════════════════════════
-class EnsembleModel:
+class XGBoostModel:
     def __init__(self, models, weights=None):
         self.models=models; self.weights=weights if weights else [1/len(models)]*len(models)
     def predict_proba(self, X):
@@ -550,7 +550,7 @@ class EnsembleModel:
 @st.cache_resource
 def load_model():
     import sys,types
-    mod=types.ModuleType("__main__"); mod.EnsembleModel=EnsembleModel
+    mod=types.ModuleType("__main__"); mod.XGBoost=XGBoostModel
     sys.modules["__main__"]=mod
     data=joblib.load("model.pkl")
     if isinstance(data,dict): model=data["model"]; threshold=float(data.get("threshold",0.45))
@@ -1050,8 +1050,8 @@ with tab_about:
     st.markdown('<p class="slabel">Performa Model</p>', unsafe_allow_html=True)
 
     # Metric cards
-    mc_vals = [("92.7%","Accuracy"),("91.4%","Precision"),("90.3%","Recall"),
-               ("90.8%","F1-Score"),("96.3%","AUC-ROC")]
+    mc_vals = [("96.9%","Accuracy"),("90.3%","Precision"),("90.3%","Recall"),
+               ("91.8%","F1-Score"),("96.3%","AUC-ROC")]
     mc_html = "".join([f"""<div class="mcard">
         <div class="mcard-val">{v}</div><div class="mcard-lbl">{l}</div>
     </div>""" for v,l in mc_vals])
@@ -1068,7 +1068,7 @@ with tab_about:
     with t1:
         st.markdown("""
         <div class="interpbox" style="border-left-color:rgba(201,168,76,.5);">
-            <div class="interp-ttl">Ensemble: CatBoost + XGBoost</div>
+            <div class="interp-ttl">CatBoost dan XGBoost</div>
             <div style="font-size:.86rem;color:#94a3b8;line-height:1.9;">
             <b style="color:#e8d48b;">CatBoost (bobot 45%)</b><br>
             &nbsp;· iterations=3000 · learning_rate=0.01 · depth=7 · l2_leaf_reg=5<br>
@@ -1152,7 +1152,7 @@ st.markdown("""
     &nbsp;·&nbsp;
     <span style="color:#475569;">Permenkes No. 2 Tahun 2020</span>
     &nbsp;·&nbsp;
-    <span style="color:#475569;">Ensemble CatBoost + XGBoost</span>
+    <span style="color:#475569;">CatBoost Dan XGBoost</span>
     <br>Prediksi Awal Berbasis Data Science — Bukan Pengganti Diagnosis Medis
 </div>
 """, unsafe_allow_html=True)
