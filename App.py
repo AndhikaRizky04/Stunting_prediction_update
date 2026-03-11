@@ -1070,11 +1070,11 @@ with tab_about:
         <div class="interpbox" style="border-left-color:rgba(201,168,76,.5);">
             <div class="interp-ttl">CatBoost dan XGBoost</div>
             <div style="font-size:.86rem;color:#94a3b8;line-height:1.9;">
-            <b style="color:#e8d48b;">CatBoost (bobot 45%)</b><br>
+            <b style="color:#e8d48b;">CatBoost</b><br>
             &nbsp;· iterations=3000 · learning_rate=0.01 · depth=7 · l2_leaf_reg=5<br>
             &nbsp;· class_weights=[1, 2.0] · rsm=0.8 · bagging_temperature=0.5<br>
             &nbsp;· Early stopping: patience=200<br><br>
-            <b style="color:#e8d48b;">XGBoost (bobot 55%)</b><br>
+            <b style="color:#e8d48b;">XGBoost</b><br>
             &nbsp;· n_estimators=2000 · learning_rate=0.02 · max_depth=7<br>
             &nbsp;· reg_lambda=5 · scale_pos_weight=4 · Early stopping: rounds=100<br><br>
             <b style="color:#e8d48b;">Imbalanced Data</b><br>
@@ -1133,7 +1133,7 @@ with tab_about:
     <div class="interpbox" style="border-left-color:rgba(248,113,113,.4);margin-top:.5rem;">
         <div class="interp-ttl" style="color:#f87171;">⚠️ Disclaimer</div>
         <div style="font-size:.84rem;color:#94a3b8;line-height:1.8;">
-        Aplikasi ini merupakan <b style="color:#e8d48b;">alat skrining awal berbasis AI</b>
+        Aplikasi ini merupakan <b style="color:#e8d48b;">alat skrining awal berbasis Machine Learning</b>
         dan <b style="color:#f87171;">tidak menggantikan diagnosis medis profesional</b>.
         Keputusan klinis harus selalu dikonsultasikan dengan dokter, bidan, atau tenaga
         kesehatan kompeten. Akurasi prediksi bergantung pada kebenaran data yang dimasukkan.
@@ -1156,6 +1156,7 @@ st.markdown("""
     <br>Prediksi Awal Berbasis Data Science — Bukan Pengganti Diagnosis Medis
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
