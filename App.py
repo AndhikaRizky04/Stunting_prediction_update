@@ -1051,7 +1051,7 @@ with tab_about:
 
     # Metric cards
     mc_vals = [("96.9%","Accuracy"),("90.3%","Precision"),("93.3%","Recall"),
-               ("91.8%","F1-Score"),("99.91%","AUC-ROC")]
+               ("91.8%","F1-Score"),("99.9%","AUC-ROC")]
     mc_html = "".join([f"""<div class="mcard">
         <div class="mcard-val">{v}</div><div class="mcard-lbl">{l}</div>
     </div>""" for v,l in mc_vals])
