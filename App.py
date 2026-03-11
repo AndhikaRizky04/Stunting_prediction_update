@@ -715,7 +715,7 @@ st.markdown("""
     <div class="hero-rule"></div>
     <p class="hero-sub">
         Analisis antropometri berbasis WHO 2006 Growth Standards
-        &nbsp;·&nbsp; Ensemble CatBoost + XGBoost &nbsp;·&nbsp; Feature Engineering 70+ Variabel
+        &nbsp;·&nbsp; CatBoost And XGBoost &nbsp;·&nbsp; Feature Engineering 70+ Variabel
     </p>
 </div>
 """, unsafe_allow_html=True)
@@ -1156,6 +1156,7 @@ st.markdown("""
     <br>Prediksi Awal Berbasis Data Science — Bukan Pengganti Diagnosis Medis
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
