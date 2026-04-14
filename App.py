@@ -542,10 +542,16 @@ div[data-testid="stNumberInput"] button{
 
 /* ─── ALERTS ────────────────────────────────── */
 div[data-testid="stAlert"]{
-    background:var(--b50)!important;
-    border:1.5px solid var(--b200)!important;
-    border-radius:var(--r-md)!important;
-    color:var(--b800)!important;
+    background:#fef9c3 !important;   /* kuning muda */
+    border:1.5px solid #facc15 !important;
+    border-radius:12px !important;
+    color:#92400e !important;        /* teks lebih gelap */
+    font-weight:600 !important;
+    box-shadow:var(--shadow) !important;
+}
+
+div[data-testid="stAlert"] p{
+    color:#92400e !important;        /* pastikan teks ikut gelap */
 }
 
 /* ─── ANIMATIONS ────────────────────────────── */
