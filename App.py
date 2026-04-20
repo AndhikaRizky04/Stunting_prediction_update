@@ -84,9 +84,74 @@ html,body,[class*="css"],.stApp,.main,
 div[data-testid="stAppViewContainer"],
 div[data-testid="stMain"]{
     font-family:'DM Sans',sans-serif!important;
-    background:#ffffff!important;
+    background:#f7f9ff!important;
     color:var(--t1)!important;
 }
+
+/* ─── RICH PAGE BACKGROUND ──────────────────── */
+div[data-testid="stAppViewContainer"]{
+    background-color:#f7f9ff!important;
+    background-image:
+        /* Dot grid */
+        radial-gradient(circle, rgba(37,99,235,.13) 1.2px, transparent 1.2px),
+        /* Large soft orb top-right */
+        radial-gradient(ellipse 55% 40% at 92% 8%, rgba(59,130,246,.09) 0%, transparent 70%),
+        /* Large soft orb bottom-left */
+        radial-gradient(ellipse 45% 35% at 5% 92%, rgba(99,102,241,.07) 0%, transparent 70%),
+        /* Horizontal stripe accent */
+        linear-gradient(180deg,
+            rgba(37,99,235,.04) 0px, rgba(37,99,235,.04) 1px,
+            transparent 1px, transparent 120px,
+            rgba(37,99,235,.025) 120px, rgba(37,99,235,.025) 121px,
+            transparent 121px
+        )!important;
+    background-size:
+        28px 28px,
+        100% 100%,
+        100% 100%,
+        100% 100%!important;
+    background-attachment: fixed!important;
+}
+
+/* Decorative geometric SVG shapes injected via pseudo on main block */
+div[data-testid="stMain"]{
+    position:relative!important;
+}
+div[data-testid="stMain"]::before{
+    content:'';
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    pointer-events:none;
+    z-index:0;
+    background-image:
+        /* Top-right corner ring */
+        radial-gradient(circle at 96% 6%, transparent 48px, rgba(37,99,235,.08) 49px, rgba(37,99,235,.08) 54px, transparent 55px),
+        radial-gradient(circle at 96% 6%, transparent 66px, rgba(37,99,235,.05) 67px, rgba(37,99,235,.05) 72px, transparent 73px),
+        /* Bottom-left corner ring */
+        radial-gradient(circle at 4% 94%, transparent 38px, rgba(99,102,241,.07) 39px, rgba(99,102,241,.07) 44px, transparent 45px),
+        radial-gradient(circle at 4% 94%, transparent 58px, rgba(99,102,241,.045) 59px, rgba(99,102,241,.045) 64px, transparent 65px),
+        /* Mid-left accent dot cluster */
+        radial-gradient(circle at 2% 45%, rgba(37,99,235,.1) 4px, transparent 5px),
+        radial-gradient(circle at 3.2% 48%, rgba(37,99,235,.07) 3px, transparent 4px),
+        radial-gradient(circle at 1.8% 51%, rgba(99,102,241,.08) 2.5px, transparent 3.5px),
+        /* Mid-right accent dot cluster */
+        radial-gradient(circle at 98% 55%, rgba(37,99,235,.09) 4px, transparent 5px),
+        radial-gradient(circle at 96.8% 58%, rgba(37,99,235,.06) 3px, transparent 4px),
+        radial-gradient(circle at 97.5% 61%, rgba(99,102,241,.07) 2.5px, transparent 3.5px),
+        /* Diagonal dashed lines (solid dots as dash simulation) */
+        radial-gradient(circle at 8% 18%, rgba(37,99,235,.07) 2px, transparent 3px),
+        radial-gradient(circle at 10% 22%, rgba(37,99,235,.06) 2px, transparent 3px),
+        radial-gradient(circle at 12% 26%, rgba(37,99,235,.05) 1.5px, transparent 2.5px),
+        radial-gradient(circle at 88% 78%, rgba(99,102,241,.07) 2px, transparent 3px),
+        radial-gradient(circle at 90% 82%, rgba(99,102,241,.06) 2px, transparent 3px),
+        radial-gradient(circle at 92% 86%, rgba(99,102,241,.05) 1.5px, transparent 2.5px);
+    background-size:100% 100%;
+    background-repeat:no-repeat;
+}
+
+/* Make content sit above decorative layer */
+.block-container > *{position:relative;z-index:1;}
+
 #MainMenu,footer,header{visibility:hidden!important;}
 .block-container{
     padding:0 1.8rem 5rem!important;
@@ -542,16 +607,62 @@ div[data-testid="stNumberInput"] button{
 
 /* ─── ALERTS ────────────────────────────────── */
 div[data-testid="stAlert"]{
-    background:#fef9c3 !important;   /* kuning muda */
-    border:1.5px solid #facc15 !important;
-    border-radius:12px !important;
-    color:#92400e !important;        /* teks lebih gelap */
-    font-weight:600 !important;
-    box-shadow:var(--shadow) !important;
+    background:var(--b50)!important;
+    border:1.5px solid var(--b200)!important;
+    border-radius:var(--r-md)!important;
+    color:var(--b800)!important;
 }
 
-div[data-testid="stAlert"] p{
-    color:#92400e !important;        /* pastikan teks ikut gelap */
+/* ─── DECORATIVE PAGE ELEMENTS ─────────────── */
+
+/* Floating blue diamond watermark bottom-right */
+.block-container::after{
+    content:'';
+    position:fixed;
+    bottom:60px;right:30px;
+    width:120px;height:120px;
+    background:
+        linear-gradient(135deg,
+            rgba(37,99,235,.06) 0%,
+            rgba(96,165,250,.04) 50%,
+            transparent 100%);
+    border:1px solid rgba(37,99,235,.1);
+    border-radius:24px;
+    transform:rotate(45deg);
+    pointer-events:none;
+    z-index:0;
+    animation:floatDiamond 6s ease-in-out infinite;
+}
+
+/* Section visual separator with wave */
+.section-wave{
+    height:32px;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 32'%3E%3Cpath d='M0,16 C150,32 300,0 450,16 C600,32 750,0 900,16 L900,32 L0,32 Z' fill='%23eff6ff' opacity='0.6'/%3E%3C/svg%3E") center/cover no-repeat;
+    margin:1rem 0;
+    pointer-events:none;
+}
+
+/* Subtle blue grid overlay on cards to add texture */
+.zcard,.ibox,.mcard{
+    background-image:
+        radial-gradient(circle, rgba(37,99,235,.035) 1px, transparent 1px)!important;
+    background-size:20px 20px!important;
+    background-color:#ffffff!important;
+}
+
+/* Glowing accent line at top of page */
+div[data-testid="stAppViewContainer"]::before{
+    content:'';
+    position:fixed;
+    top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,
+        transparent 0%,
+        rgba(37,99,235,.6) 20%,
+        rgba(59,130,246,.9) 50%,
+        rgba(96,165,250,.7) 80%,
+        transparent 100%);
+    z-index:9999;
+    pointer-events:none;
 }
 
 /* ─── ANIMATIONS ────────────────────────────── */
@@ -566,6 +677,10 @@ div[data-testid="stAlert"] p{
 @keyframes pulse{
     0%,100%{box-shadow:0 0 0 3px rgba(37,99,235,.2);}
     50%{box-shadow:0 0 0 6px rgba(37,99,235,.08);}
+}
+@keyframes floatDiamond{
+    0%,100%{transform:rotate(45deg) translateY(0);}
+    50%{transform:rotate(45deg) translateY(-10px);}
 }
 </style>
 """, unsafe_allow_html=True)
@@ -994,6 +1109,35 @@ def plot_metrics():
 # ══════════════════════════════════════════════
 
 st.markdown("<div style='height:1.5rem'></div>", unsafe_allow_html=True)
+
+# ── DECORATIVE FLOATING SHAPES ─────────────────
+st.markdown("""
+<div style="position:relative;pointer-events:none;height:0;overflow:visible;z-index:0;margin-bottom:-1rem;">
+    <svg style="position:absolute;top:-30px;right:-40px;width:280px;height:280px;" viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="190" cy="115" r="105" stroke="#2563eb" stroke-width="1" stroke-dasharray="6 10" opacity=".18"/>
+        <circle cx="190" cy="115" r="74" stroke="#60a5fa" stroke-width="0.7" stroke-dasharray="4 14" opacity=".14"/>
+        <circle cx="100" cy="44" r="5" fill="#bfdbfe" opacity=".65"/>
+        <circle cx="258" cy="70" r="3.5" fill="#93c5fd" opacity=".55"/>
+        <circle cx="240" cy="195" r="5.5" fill="#dbeafe" opacity=".7"/>
+        <circle cx="130" cy="210" r="3" fill="#60a5fa" opacity=".45"/>
+        <circle cx="215" cy="36" r="2.5" fill="#3b82f6" opacity=".4"/>
+        <circle cx="226" cy="36" r="2.5" fill="#3b82f6" opacity=".4"/>
+        <circle cx="220" cy="29" r="2.5" fill="#3b82f6" opacity=".4"/>
+        <circle cx="220" cy="43" r="2.5" fill="#3b82f6" opacity=".4"/>
+        <polygon points="268,158 250,188 286,188" stroke="#93c5fd" stroke-width="0.9" fill="none" opacity=".3"/>
+        <rect x="58" y="150" width="11" height="11" rx="2" stroke="#3b82f6" stroke-width="0.8" fill="none" opacity=".25"/>
+    </svg>
+    <svg style="position:absolute;top:200px;left:-50px;width:200px;height:200px;" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="100,15 165,52 165,128 100,165 35,128 35,52" stroke="#2563eb" stroke-width="0.8" stroke-dasharray="5 9" fill="none" opacity=".2"/>
+        <polygon points="100,35 148,62 148,118 100,145 52,118 52,62" stroke="#60a5fa" stroke-width="0.6" stroke-dasharray="3 12" fill="none" opacity=".15"/>
+        <circle cx="30" cy="32" r="4" fill="#bfdbfe" opacity=".65"/>
+        <circle cx="170" cy="168" r="3.5" fill="#93c5fd" opacity=".55"/>
+        <circle cx="42" cy="158" r="5" fill="#dbeafe" opacity=".7"/>
+        <rect x="154" y="22" width="10" height="10" rx="2" stroke="#3b82f6" stroke-width="0.7" fill="none" opacity=".25"/>
+        <rect x="159" y="27" width="10" height="10" rx="2" stroke="#60a5fa" stroke-width="0.5" fill="none" opacity=".16"/>
+    </svg>
+</div>
+""", unsafe_allow_html=True)
 
 # ── HERO ──────────────────────────────────────
 st.markdown("""
