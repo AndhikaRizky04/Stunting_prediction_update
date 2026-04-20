@@ -610,7 +610,7 @@ div[data-testid="stAlert"]{
     background:#fff7ed !important;
     border:1.5px solid #fb923c !important;
     border-left:6px solid #f97316 !important;
-    color:#7c2d12 !important;
+    color:#92400e !important;
     font-weight:600 !important;
 }
 
