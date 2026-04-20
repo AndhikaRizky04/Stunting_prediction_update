@@ -607,10 +607,11 @@ div[data-testid="stNumberInput"] button{
 
 /* ─── ALERTS ────────────────────────────────── */
 div[data-testid="stAlert"]{
-    background:var(--b50)!important;
-    border:1.5px solid var(--b200)!important;
-    border-radius:var(--r-md)!important;
-    color:var(--b800)!important;
+    background:#fff7ed !important;
+    border:1.5px solid #fb923c !important;
+    border-left:6px solid #f97316 !important;
+    color:#7c2d12 !important;
+    font-weight:600 !important;
 }
 
 /* ─── DECORATIVE PAGE ELEMENTS ─────────────── */
