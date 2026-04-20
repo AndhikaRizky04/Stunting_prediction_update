@@ -607,11 +607,16 @@ div[data-testid="stNumberInput"] button{
 
 /* ─── ALERTS ────────────────────────────────── */
 div[data-testid="stAlert"]{
-    background:#fff7ed !important;
-    border:1.5px solid #fb923c !important;
-    border-left:6px solid #f97316 !important;
-    color:#92400e !important;
+    background:#fef9c3 !important;   /* kuning muda */
+    border:1.5px solid #facc15 !important;
+    border-radius:12px !important;
+    color:#92400e !important;        /* teks lebih gelap */
     font-weight:600 !important;
+    box-shadow:var(--shadow) !important;
+}
+
+div[data-testid="stAlert"] p{
+    color:#92400e !important;        /* pastikan teks ikut gelap */
 }
 
 /* ─── DECORATIVE PAGE ELEMENTS ─────────────── */
