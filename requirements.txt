@@ -1,7 +1,9 @@
-streamlit
+streamlit>=1.31
+python-dateutil
 pandas
 numpy
+joblib
 scikit-learn
 xgboost
 catboost
-joblib
+matplotlib
