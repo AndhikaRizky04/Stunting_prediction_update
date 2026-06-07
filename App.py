@@ -1219,13 +1219,13 @@ with tab_pred:
     with c2:
         tgl_lahir = st.date_input("Tanggal Lahir",
                                   value=date.today() - relativedelta(months=24),
-                                  min_value=date.today() - relativedelta(months=66),
+                                  min_value=date(2019, 1, 1),
                                   max_value=date.today(),
                                   format="DD/MM/YYYY", key="p_lahir")
     with c3:
         tgl_ukur = st.date_input("Tanggal Pengukuran",
                                  value=date.today(),
-                                 min_value=date.today() - relativedelta(months=66),
+                                 min_value=date(2019, 1, 1),
                                  max_value=date.today(),
                                  format="DD/MM/YYYY", key="p_ukur")
 
@@ -1291,75 +1291,78 @@ with tab_pred:
 
     # ══════════════════════════════════════════
     # INDEKS ANTROPOMETRI: BB/U · TB/U · BB/TB
-    # Z-Score bisa otomatis (WHO 2006) atau diketik manual
+    # Z-Score DIISI MANUAL (kotak kosong sampai diketik)
     # Status: dropdown dengan kategori persis seperti dataset asli
     # ══════════════════════════════════════════
     st.markdown('<p class="slabel" style="margin-top:1.2rem;">Indeks Antropometri (Permenkes No.2/2020)</p>',
                 unsafe_allow_html=True)
 
-    auto_zs = st.checkbox("Hitung Z-Score otomatis dari BB / TB / Umur (standar WHO 2006)",
-                          value=True, key="p_auto_zs",
-                          help="Centang: ZS BB/U, ZS TB/U, ZS BB/TB dihitung dari tabel WHO. Hilangkan centang untuk mengetik nilai Z-Score sendiri (mis. menyalin dari e-PPGBM / buku KIA).")
-
-    # nilai default selalu dari perhitungan WHO (sebagai acuan awal)
-    zs_bbu_who  = calc_bbu(berat, umur_bulan, jk)
-    zs_bbtb_who = calc_bbtb(berat, tinggi, jk, cu_mode, umur_bulan)
-    zs_tbu_who  = calc_tbu(tinggi, umur_bulan, jk)
-
-    if auto_zs:
-        zs_bbu_in, zs_tbu_in, zs_bbtb_in = zs_bbu_who, zs_tbu_who, zs_bbtb_who
-    else:
-        z1, z2, z3 = st.columns(3)
-        with z1:
-            zs_bbu_in  = st.number_input("ZS BB/U", -10.0, 10.0, float(zs_bbu_who), 0.01,
-                                         format="%.2f", key="p_zs_bbu")
-        with z2:
-            zs_tbu_in  = st.number_input("ZS TB/U", -10.0, 10.0, float(zs_tbu_who), 0.01,
-                                         format="%.2f", key="p_zs_tbu")
-        with z3:
-            zs_bbtb_in = st.number_input("ZS BB/TB", -10.0, 10.0, float(zs_bbtb_who), 0.01,
-                                         format="%.2f", key="p_zs_bbtb")
-        st.caption("✏️ Mode manual aktif — nilai awal diisi hasil hitung WHO, silakan timpa sesuai data Anda. "
-                   "(Catatan: data dengan ZS ≤ −10 dibuang saat training, sesuai notebook.)")
+    z1, z2, z3 = st.columns(3)
+    with z1:
+        zs_bbu_in  = st.number_input("ZS BB/U", min_value=-10.0, max_value=10.0,
+                                     value=None, step=0.01, format="%.2f",
+                                     placeholder="Mis. -1.26", key="p_zs_bbu")
+    with z2:
+        zs_tbu_in  = st.number_input("ZS TB/U", min_value=-10.0, max_value=10.0,
+                                     value=None, step=0.01, format="%.2f",
+                                     placeholder="Mis. -0.41", key="p_zs_tbu")
+    with z3:
+        zs_bbtb_in = st.number_input("ZS BB/TB", min_value=-10.0, max_value=10.0,
+                                     value=None, step=0.01, format="%.2f",
+                                     placeholder="Mis. -1.66", key="p_zs_bbtb")
+    st.caption("✏️ Ketik nilai Z-Score secara manual (mis. dari e-PPGBM / buku KIA / dataset). "
+               "Catatan: data dengan ZS ≤ −10 dibuang saat training, sesuai notebook.")
 
     # ── STATUS DROPDOWN — kategori persis dataset asli (Data-fix-gabungan.xlsx)
     s1, s2, s3 = st.columns(3)
     with s1:
-        st_bbu  = st.selectbox("BB/U (Status)", OPT_BBU,
-                               index=OPT_BBU.index(status_default_bbu(zs_bbu_in)),
-                               key="p_st_bbu")
+        st_bbu  = st.selectbox("BB/U (Status)", OPT_BBU, index=None,
+                               placeholder="Pilih status…", key="p_st_bbu")
+        if zs_bbu_in is not None:
+            st.caption(f"Saran (Permenkes): **{status_default_bbu(zs_bbu_in)}**")
     with s2:
-        st_tbu  = st.selectbox("TB/U (Status)", OPT_TBU,
-                               index=OPT_TBU.index(status_default_tbu(zs_tbu_in)),
-                               key="p_st_tbu")
+        st_tbu  = st.selectbox("TB/U (Status)", OPT_TBU, index=None,
+                               placeholder="Pilih status…", key="p_st_tbu")
+        if zs_tbu_in is not None:
+            st.caption(f"Saran (Permenkes): **{status_default_tbu(zs_tbu_in)}**")
     with s3:
-        st_bbtb = st.selectbox("BB/TB (Status)", OPT_BBTB,
-                               index=OPT_BBTB.index(status_default_bbtb(zs_bbtb_in)),
-                               key="p_st_bbtb")
+        st_bbtb = st.selectbox("BB/TB (Status)", OPT_BBTB, index=None,
+                               placeholder="Pilih status…", key="p_st_bbtb")
+        if zs_bbtb_in is not None:
+            st.caption(f"Saran (Permenkes): **{status_default_bbtb(zs_bbtb_in)}**")
 
-    # ── PRATINJAU KARTU INDEKS — mengikuti nilai & status yang dipilih
-    pcol1, pbg1 = STATUS_COLOR.get(st_bbu,  ("#475569","rgba(71,85,105,.1)"))
-    pcol2, pbg2 = STATUS_COLOR.get(st_tbu,  ("#475569","rgba(71,85,105,.1)"))
-    pcol3, pbg3 = STATUS_COLOR.get(st_bbtb, ("#475569","rgba(71,85,105,.1)"))
+    # ── PRATINJAU KARTU INDEKS — kosong sebelum diisi, terisi setelah input
+    def _card_vals(zs, status):
+        if zs is None:
+            return "—", "#cbd5e1", ("Belum diisi", "#94a3b8", "rgba(148,163,184,.12)")
+        lbl = status if status else "—"
+        col, bg = STATUS_COLOR.get(status, ("#94a3b8","rgba(148,163,184,.12)")) if status else ("#94a3b8","rgba(148,163,184,.12)")
+        zcol = col if status else "#475569"
+        return f"{zs:+.2f}", zcol, (lbl, col, bg)
+
+    v1, vc1, (b1, bc1, bb1) = _card_vals(zs_bbu_in,  st_bbu)
+    v2, vc2, (b2, bc2, bb2) = _card_vals(zs_tbu_in,  st_tbu)
+    v3, vc3, (b3, bc3, bb3) = _card_vals(zs_bbtb_in, st_bbtb)
+    tbu_warn = (zs_tbu_in is not None and zs_tbu_in < -2)
     st.markdown(f"""
     <div class="zrow" style="margin-top:.6rem;">
         <div class="zcard">
             <div class="ztag">BB/U &nbsp;·&nbsp; ZS BB/U</div>
-            <div class="zval" style="color:{pcol1};">{zs_bbu_in:+.2f}</div>
+            <div class="zval" style="color:{vc1};">{v1}</div>
             <div class="zdesc">Berat Badan menurut Umur</div>
-            <span class="zbadge" style="background:{pbg1};color:{pcol1};">{st_bbu}</span>
+            <span class="zbadge" style="background:{bb1};color:{bc1};">{b1}</span>
         </div>
-        <div class="zcard" style="{'border-color:rgba(185,28,28,.3);' if zs_tbu_in<-2 else ''}">
+        <div class="zcard" style="{'border-color:rgba(185,28,28,.3);' if tbu_warn else ''}">
             <div class="ztag">TB/U &nbsp;·&nbsp; ZS TB/U ★</div>
-            <div class="zval" style="color:{pcol2};">{zs_tbu_in:+.2f}</div>
+            <div class="zval" style="color:{vc2};">{v2}</div>
             <div class="zdesc">Tinggi Badan menurut Umur — Indikator Stunting</div>
-            <span class="zbadge" style="background:{pbg2};color:{pcol2};">{st_tbu}</span>
+            <span class="zbadge" style="background:{bb2};color:{bc2};">{b2}</span>
         </div>
         <div class="zcard">
             <div class="ztag">BB/TB &nbsp;·&nbsp; ZS BB/TB</div>
-            <div class="zval" style="color:{pcol3};">{zs_bbtb_in:+.2f}</div>
+            <div class="zval" style="color:{vc3};">{v3}</div>
             <div class="zdesc">Berat Badan menurut Tinggi Badan — Wasting</div>
-            <span class="zbadge" style="background:{pbg3};color:{pcol3};">{st_bbtb}</span>
+            <span class="zbadge" style="background:{bb3};color:{bc3};">{b3}</span>
         </div>
     </div>
     <div style="font-size:.66rem;color:#94a3b8;text-align:right;margin:-0.2rem 0 1rem;">
@@ -1368,17 +1371,26 @@ with tab_pred:
     </div>
     """, unsafe_allow_html=True)
 
+    zs_lengkap = (zs_bbu_in is not None) and (zs_tbu_in is not None) and (zs_bbtb_in is not None)
+    if not zs_lengkap:
+        st.info("ℹ️ Isi ketiga nilai Z-Score (ZS BB/U, ZS TB/U, ZS BB/TB) terlebih dahulu untuk mengaktifkan tombol prediksi.")
+
     st.markdown("<div style='height:.4rem'></div>", unsafe_allow_html=True)
-    btn = st.button("🔍  Analisis & Prediksi Sekarang", key="btn_pred", disabled=not umur_valid)
+    btn = st.button("🔍  Analisis & Prediksi Sekarang", key="btn_pred",
+                    disabled=(not umur_valid) or (not zs_lengkap))
 
     if btn:
+        # status yang dipakai di hasil: pilihan pengguna, atau klasifikasi Permenkes jika belum dipilih
+        st_bbu  = st_bbu  or status_default_bbu(zs_bbu_in)
+        st_tbu  = st_tbu  or status_default_tbu(zs_tbu_in)
+        st_bbtb = st_bbtb or status_default_bbtb(zs_bbtb_in)
         with st.spinner("Menganalisis data antropometri..."):
             try:
                 pct, conf, zs_bbu, zs_bbtb, thr_pct = predict(
                     umur_bulan, jk, berat, tinggi, cu_mode,
-                    zs_bbu_manual=None if auto_zs else zs_bbu_in,
-                    zs_bbtb_manual=None if auto_zs else zs_bbtb_in)
-                zs_tbu = zs_tbu_in
+                    zs_bbu_manual=float(zs_bbu_in),
+                    zs_bbtb_manual=float(zs_bbtb_in))
+                zs_tbu = float(zs_tbu_in)
                 med_tb = get_median_tbu(umur_bulan, jk)
                 med_bb = get_median_bbu(umur_bulan, jk)
             except Exception as e:
