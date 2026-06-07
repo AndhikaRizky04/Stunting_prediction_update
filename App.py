@@ -748,6 +748,56 @@ def lbl_tbu(z):
     if z<=3: return "Normal",       "#059669","rgba(5,150,105,.1)"
     return "Tinggi",                "#0e7490","rgba(14,116,144,.1)"
 
+# ══════════════════════════════════════════════
+# OPSI DROPDOWN STATUS — SESUAI NILAI UNIK DATASET ASLI
+# (Data-fix-gabungan.xlsx, kolom BB/U · TB/U · BB/TB)
+# ══════════════════════════════════════════════
+OPT_BBU  = ["Sangat Kurang","Kurang","Gizi Buruk","Gizi Kurang",
+            "Normal","Gizi Baik","Risiko Lebih","Gizi Lebih"]
+OPT_TBU  = ["Sangat Pendek","Pendek","Normal","Tinggi"]
+OPT_BBTB = ["Sangat Kurus","Kurus","Gizi Kurang","Gizi Baik",
+            "Normal","Risiko Gizi Lebih","Gizi Lebih","Obesitas"]
+
+STATUS_COLOR = {
+    "Sangat Kurang":("#b91c1c","rgba(185,28,28,.1)"),
+    "Kurang":("#c2410c","rgba(194,65,12,.1)"),
+    "Gizi Buruk":("#b91c1c","rgba(185,28,28,.1)"),
+    "Gizi Kurang":("#c2410c","rgba(194,65,12,.1)"),
+    "Sangat Kurus":("#b91c1c","rgba(185,28,28,.1)"),
+    "Kurus":("#c2410c","rgba(194,65,12,.1)"),
+    "Normal":("#059669","rgba(5,150,105,.1)"),
+    "Gizi Baik":("#059669","rgba(5,150,105,.1)"),
+    "Risiko Lebih":("#b45309","rgba(180,83,9,.1)"),
+    "Risiko Gizi Lebih":("#b45309","rgba(180,83,9,.1)"),
+    "Gizi Lebih":("#92400e","rgba(146,64,14,.1)"),
+    "Obesitas":("#991b1b","rgba(153,27,27,.1)"),
+    "Sangat Pendek":("#b91c1c","rgba(185,28,28,.1)"),
+    "Pendek":("#c2410c","rgba(194,65,12,.1)"),
+    "Tinggi":("#0e7490","rgba(14,116,144,.1)"),
+}
+
+def status_default_bbu(z):
+    """Klasifikasi ZS BB/U → kosakata dataset asli (Permenkes)."""
+    if z<-3: return "Sangat Kurang"
+    if z<-2: return "Kurang"
+    if z<=1: return "Normal"
+    return "Risiko Lebih"
+
+def status_default_tbu(z):
+    if z<-3: return "Sangat Pendek"
+    if z<-2: return "Pendek"
+    if z<=3: return "Normal"
+    return "Tinggi"
+
+def status_default_bbtb(z):
+    """Klasifikasi ZS BB/TB → kosakata dataset asli."""
+    if z<-3: return "Sangat Kurus"
+    if z<-2: return "Kurus"
+    if z<=1: return "Gizi Baik"
+    if z<=2: return "Risiko Gizi Lebih"
+    if z<=3: return "Gizi Lebih"
+    return "Obesitas"
+
 def risk_tier(pct, thr):
     """Tier risiko relatif terhadap threshold optimal model (dari model.pkl).
     Prediksi 'Stunting' jika probabilitas >= threshold (sesuai notebook)."""
@@ -940,9 +990,12 @@ def load_model():
         model=data; threshold=0.579
     return model,threshold,feat_order,rank_ref
 
-def predict(umur,jk,berat,tinggi,cara):
+def predict(umur,jk,berat,tinggi,cara, zs_bbu_manual=None, zs_bbtb_manual=None):
     model,thr,feat_order,rank_ref=load_model()
-    X,zb,zbt=build_features(umur,jk,berat,tinggi,cara,rank_ref=rank_ref)
+    X,zb,zbt=build_features(umur,jk,berat,tinggi,cara,
+                            zs_bbu_manual=zs_bbu_manual,
+                            zs_bbtb_manual=zs_bbtb_manual,
+                            rank_ref=rank_ref)
     if feat_order:                       # pastikan urutan kolom = urutan training
         X=X[feat_order]
     p=model.predict_proba(X)[0]
@@ -1176,25 +1229,41 @@ with tab_pred:
                                  max_value=date.today(),
                                  format="DD/MM/YYYY", key="p_ukur")
 
-    # ── UMUR otomatis dari selisih tanggal (umur penuh / completed months)
-    umur_bulan = hitung_umur_bulan(tgl_lahir, tgl_ukur)
-    if umur_bulan is None:
+    # ── UMUR: bisa otomatis dari tanggal, bisa diketik manual
+    umur_auto = hitung_umur_bulan(tgl_lahir, tgl_ukur)
+    if umur_auto is None:
         st.error("Tanggal pengukuran tidak boleh sebelum tanggal lahir.")
         st.stop()
 
-    umur_valid = 0 <= umur_bulan <= 60
-    u_col = "#1e4db7" if umur_valid else "#b91c1c"
-    st.markdown(f"""
-    <div style="background:#ffffff;border:1.5px solid var(--b100);border-left:4px solid {u_col};
-                border-radius:var(--r-md);padding:.85rem 1.3rem;margin:.3rem 0 1rem;
-                box-shadow:var(--shadow-sm);display:flex;align-items:baseline;gap:.9rem;">
-        <span style="font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:#94a3b8;font-weight:700;">Umur (Bulan)</span>
-        <span style="font-family:'DM Serif Display',serif;font-size:1.6rem;color:{u_col};line-height:1;">{umur_bulan}</span>
-        <span style="font-size:.72rem;color:#94a3b8;">bulan penuh &nbsp;·&nbsp; dihitung otomatis dari tanggal lahir → tanggal pengukuran</span>
-    </div>
-    """, unsafe_allow_html=True)
-    if not umur_valid:
+    cu1, cu2 = st.columns([1.3, 2])
+    with cu1:
+        auto_umur = st.checkbox("Hitung umur otomatis dari tanggal",
+                                value=True, key="p_auto_umur",
+                                help="Centang: umur dihitung dari Tanggal Lahir → Tanggal Pengukuran (umur penuh). Hilangkan centang untuk mengetik umur sendiri.")
+    if auto_umur:
+        umur_bulan = umur_auto
+        with cu2:
+            umur_valid = 0 <= umur_bulan <= 60
+            u_col = "#1e4db7" if umur_valid else "#b91c1c"
+            st.markdown(f"""
+            <div style="background:#ffffff;border:1.5px solid var(--b100);border-left:4px solid {u_col};
+                        border-radius:var(--r-md);padding:.7rem 1.2rem;
+                        box-shadow:var(--shadow-sm);display:flex;align-items:baseline;gap:.8rem;">
+                <span style="font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:#94a3b8;font-weight:700;">Umur (Bulan)</span>
+                <span style="font-family:'DM Serif Display',serif;font-size:1.5rem;color:{u_col};line-height:1;">{umur_bulan}</span>
+                <span style="font-size:.7rem;color:#94a3b8;">bulan penuh (otomatis)</span>
+            </div>
+            """, unsafe_allow_html=True)
+    else:
+        with cu2:
+            umur_bulan = st.number_input("Umur (Bulan) — input manual", 0, 60,
+                                         int(min(60, max(0, umur_auto))), 1, key="p_umur_manual")
+        umur_valid = True
+    if not (0 <= umur_bulan <= 60):
+        umur_valid = False
         st.warning("⚠️ Umur di luar rentang 0–60 bulan. Model hanya valid untuk balita 0–60 bulan (Permenkes No.2/2020).")
+    else:
+        umur_valid = True
 
     # ── INPUT: antropometri
     c4, c5 = st.columns(2)
@@ -1220,37 +1289,82 @@ with tab_pred:
     for w in validate(umur_bulan, berat, tinggi):
         st.warning(f"⚠️ {w}")
 
-    # ── PRATINJAU INDEKS ANTROPOMETRI (BB/U · TB/U · BB/TB) — live
-    zs_bbu_prev  = calc_bbu(berat, umur_bulan, jk)
-    zs_bbtb_prev = calc_bbtb(berat, tinggi, jk, cu_mode, umur_bulan)
-    zs_tbu_prev  = calc_tbu(tinggi, umur_bulan, jk)
-    pc1,pcol1,pbg1 = lbl_bbu(zs_bbu_prev)
-    pc2,pcol2,pbg2 = lbl_tbu(zs_tbu_prev)
-    pc3,pcol3,pbg3 = lbl_bbtb(zs_bbtb_prev)
+    # ══════════════════════════════════════════
+    # INDEKS ANTROPOMETRI: BB/U · TB/U · BB/TB
+    # Z-Score bisa otomatis (WHO 2006) atau diketik manual
+    # Status: dropdown dengan kategori persis seperti dataset asli
+    # ══════════════════════════════════════════
+    st.markdown('<p class="slabel" style="margin-top:1.2rem;">Indeks Antropometri (Permenkes No.2/2020)</p>',
+                unsafe_allow_html=True)
+
+    auto_zs = st.checkbox("Hitung Z-Score otomatis dari BB / TB / Umur (standar WHO 2006)",
+                          value=True, key="p_auto_zs",
+                          help="Centang: ZS BB/U, ZS TB/U, ZS BB/TB dihitung dari tabel WHO. Hilangkan centang untuk mengetik nilai Z-Score sendiri (mis. menyalin dari e-PPGBM / buku KIA).")
+
+    # nilai default selalu dari perhitungan WHO (sebagai acuan awal)
+    zs_bbu_who  = calc_bbu(berat, umur_bulan, jk)
+    zs_bbtb_who = calc_bbtb(berat, tinggi, jk, cu_mode, umur_bulan)
+    zs_tbu_who  = calc_tbu(tinggi, umur_bulan, jk)
+
+    if auto_zs:
+        zs_bbu_in, zs_tbu_in, zs_bbtb_in = zs_bbu_who, zs_tbu_who, zs_bbtb_who
+    else:
+        z1, z2, z3 = st.columns(3)
+        with z1:
+            zs_bbu_in  = st.number_input("ZS BB/U", -10.0, 10.0, float(zs_bbu_who), 0.01,
+                                         format="%.2f", key="p_zs_bbu")
+        with z2:
+            zs_tbu_in  = st.number_input("ZS TB/U", -10.0, 10.0, float(zs_tbu_who), 0.01,
+                                         format="%.2f", key="p_zs_tbu")
+        with z3:
+            zs_bbtb_in = st.number_input("ZS BB/TB", -10.0, 10.0, float(zs_bbtb_who), 0.01,
+                                         format="%.2f", key="p_zs_bbtb")
+        st.caption("✏️ Mode manual aktif — nilai awal diisi hasil hitung WHO, silakan timpa sesuai data Anda. "
+                   "(Catatan: data dengan ZS ≤ −10 dibuang saat training, sesuai notebook.)")
+
+    # ── STATUS DROPDOWN — kategori persis dataset asli (Data-fix-gabungan.xlsx)
+    s1, s2, s3 = st.columns(3)
+    with s1:
+        st_bbu  = st.selectbox("BB/U (Status)", OPT_BBU,
+                               index=OPT_BBU.index(status_default_bbu(zs_bbu_in)),
+                               key="p_st_bbu")
+    with s2:
+        st_tbu  = st.selectbox("TB/U (Status)", OPT_TBU,
+                               index=OPT_TBU.index(status_default_tbu(zs_tbu_in)),
+                               key="p_st_tbu")
+    with s3:
+        st_bbtb = st.selectbox("BB/TB (Status)", OPT_BBTB,
+                               index=OPT_BBTB.index(status_default_bbtb(zs_bbtb_in)),
+                               key="p_st_bbtb")
+
+    # ── PRATINJAU KARTU INDEKS — mengikuti nilai & status yang dipilih
+    pcol1, pbg1 = STATUS_COLOR.get(st_bbu,  ("#475569","rgba(71,85,105,.1)"))
+    pcol2, pbg2 = STATUS_COLOR.get(st_tbu,  ("#475569","rgba(71,85,105,.1)"))
+    pcol3, pbg3 = STATUS_COLOR.get(st_bbtb, ("#475569","rgba(71,85,105,.1)"))
     st.markdown(f"""
-    <p class="slabel" style="margin-top:1.2rem;">Indeks Antropometri (Permenkes No.2/2020)</p>
-    <div class="zrow">
+    <div class="zrow" style="margin-top:.6rem;">
         <div class="zcard">
             <div class="ztag">BB/U &nbsp;·&nbsp; ZS BB/U</div>
-            <div class="zval" style="color:{pcol1};">{zs_bbu_prev:+.2f}</div>
+            <div class="zval" style="color:{pcol1};">{zs_bbu_in:+.2f}</div>
             <div class="zdesc">Berat Badan menurut Umur</div>
-            <span class="zbadge" style="background:{pbg1};color:{pcol1};">{pc1}</span>
+            <span class="zbadge" style="background:{pbg1};color:{pcol1};">{st_bbu}</span>
         </div>
-        <div class="zcard" style="{'border-color:rgba(185,28,28,.3);' if zs_tbu_prev<-2 else ''}">
+        <div class="zcard" style="{'border-color:rgba(185,28,28,.3);' if zs_tbu_in<-2 else ''}">
             <div class="ztag">TB/U &nbsp;·&nbsp; ZS TB/U ★</div>
-            <div class="zval" style="color:{pcol2};">{zs_tbu_prev:+.2f}</div>
+            <div class="zval" style="color:{pcol2};">{zs_tbu_in:+.2f}</div>
             <div class="zdesc">Tinggi Badan menurut Umur — Indikator Stunting</div>
-            <span class="zbadge" style="background:{pbg2};color:{pcol2};">{pc2}</span>
+            <span class="zbadge" style="background:{pbg2};color:{pcol2};">{st_tbu}</span>
         </div>
         <div class="zcard">
             <div class="ztag">BB/TB &nbsp;·&nbsp; ZS BB/TB</div>
-            <div class="zval" style="color:{pcol3};">{zs_bbtb_prev:+.2f}</div>
+            <div class="zval" style="color:{pcol3};">{zs_bbtb_in:+.2f}</div>
             <div class="zdesc">Berat Badan menurut Tinggi Badan — Wasting</div>
-            <span class="zbadge" style="background:{pbg3};color:{pcol3};">{pc3}</span>
+            <span class="zbadge" style="background:{pbg3};color:{pcol3};">{st_bbtb}</span>
         </div>
     </div>
     <div style="font-size:.66rem;color:#94a3b8;text-align:right;margin:-0.2rem 0 1rem;">
-        ★ TB/U adalah target model (label stunting). Fitur model hanya memakai BB/U &amp; BB/TB — sesuai notebook (anti data-leakage).
+        ★ TB/U adalah target model (label stunting). Prediksi dihitung dari <b>nilai Z-Score</b> BB/U &amp; BB/TB
+        (status dropdown hanya tampilan/pencatatan) — sesuai notebook, anti data-leakage.
     </div>
     """, unsafe_allow_html=True)
 
@@ -1260,8 +1374,11 @@ with tab_pred:
     if btn:
         with st.spinner("Menganalisis data antropometri..."):
             try:
-                pct, conf, zs_bbu, zs_bbtb, thr_pct = predict(umur_bulan, jk, berat, tinggi, cu_mode)
-                zs_tbu = calc_tbu(tinggi, umur_bulan, jk)
+                pct, conf, zs_bbu, zs_bbtb, thr_pct = predict(
+                    umur_bulan, jk, berat, tinggi, cu_mode,
+                    zs_bbu_manual=None if auto_zs else zs_bbu_in,
+                    zs_bbtb_manual=None if auto_zs else zs_bbtb_in)
+                zs_tbu = zs_tbu_in
                 med_tb = get_median_tbu(umur_bulan, jk)
                 med_bb = get_median_bbu(umur_bulan, jk)
             except Exception as e:
@@ -1324,29 +1441,29 @@ with tab_pred:
             </div>
             """, unsafe_allow_html=True)
 
-        # ── Z-SCORE CARDS (BB/U · TB/U · BB/TB) — sama dengan perhitungan model
-        bc, bcol, bbg    = lbl_bbu(zs_bbu)
-        btbc,btbcol,btbbg= lbl_bbtb(zs_bbtb)
-        tc, tcol, tbg    = lbl_tbu(zs_tbu)
+        # ── Z-SCORE CARDS (BB/U · TB/U · BB/TB) — nilai & status sesuai input
+        bcol, bbg     = STATUS_COLOR.get(st_bbu,  ("#475569","rgba(71,85,105,.1)"))
+        tcol, tbg     = STATUS_COLOR.get(st_tbu,  ("#475569","rgba(71,85,105,.1)"))
+        btbcol, btbbg = STATUS_COLOR.get(st_bbtb, ("#475569","rgba(71,85,105,.1)"))
         st.markdown(f"""
         <div class="zrow">
             <div class="zcard">
                 <div class="ztag">BB/U &nbsp;·&nbsp; ZS BB/U</div>
                 <div class="zval" style="color:{bcol};">{zs_bbu:+.2f}</div>
                 <div class="zdesc">Berat Badan menurut Umur</div>
-                <span class="zbadge" style="background:{bbg};color:{bcol};">{bc}</span>
+                <span class="zbadge" style="background:{bbg};color:{bcol};">{st_bbu}</span>
             </div>
             <div class="zcard" style="{'border-color:rgba(185,28,28,.3);' if zs_tbu<-2 else ''}">
                 <div class="ztag">TB/U &nbsp;·&nbsp; ZS TB/U ★</div>
                 <div class="zval" style="color:{tcol};">{zs_tbu:+.2f}</div>
                 <div class="zdesc">Indikator Stunting Utama</div>
-                <span class="zbadge" style="background:{tbg};color:{tcol};">{tc}</span>
+                <span class="zbadge" style="background:{tbg};color:{tcol};">{st_tbu}</span>
             </div>
             <div class="zcard">
                 <div class="ztag">BB/TB &nbsp;·&nbsp; ZS BB/TB</div>
                 <div class="zval" style="color:{btbcol};">{zs_bbtb:+.2f}</div>
                 <div class="zdesc">Wasting / Status Gizi</div>
-                <span class="zbadge" style="background:{btbbg};color:{btbcol};">{btbc}</span>
+                <span class="zbadge" style="background:{btbbg};color:{btbcol};">{st_bbtb}</span>
             </div>
         </div>
         <div style="font-size:.66rem;color:#94a3b8;text-align:right;margin:-0.2rem 0 1rem;">
